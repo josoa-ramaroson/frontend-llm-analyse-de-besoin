@@ -21,7 +21,7 @@ export function Header({ onSidebarToggle }: HeaderProps) {
         >
           <Menu className="w-5 h-5 text-foreground" />
         </button>
-        <h1 className="text-lg font-semibold text-foreground">ChatGPT Clone</h1>
+        <h1 className="text-lg font-semibold text-foreground">Need Analysis LLM</h1>
       </div>
 
       <button

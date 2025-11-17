@@ -26,7 +26,7 @@ export function ChatWindow() {
             </div>
             <h2 className="text-2xl font-semibold text-foreground">How can I assist you today?</h2>
             <p className="text-foreground/60 max-w-md">
-              Ask me anything or start a conversation. I'm here to help!
+              Send me any document and ask me anything about the document, I can help in extracting need
             </p>
           </div>
         ) : (
