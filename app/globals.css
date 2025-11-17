@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: #0d0d0d;
+  --color-foreground: #ececf1;
+  --color-secondary: #1a1a1a;
+  --color-border: #2a2a2a;
+  --color-primary: #10a37f;
+  --color-muted: #565869;
+
+  --radius: 0.5rem;
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  @apply h-screen;
+}
+
+body {
+  @apply h-screen overflow-hidden bg-background text-foreground;
+}
+
+/* Tailwind animations */
+@keyframes slide-in-from-bottom-2 {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-bottom-2 0.3s ease-out;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
