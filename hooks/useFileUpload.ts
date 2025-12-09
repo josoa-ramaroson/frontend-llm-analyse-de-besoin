@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { apiService } from '@/services/ApiService';
+import { apiService } from '@/services/apiService';
 
 export interface UseFileUploadReturn {
   progress: number;

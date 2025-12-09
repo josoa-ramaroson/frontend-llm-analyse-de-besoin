@@ -11,15 +11,15 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
       {/* Mobile overlay */}
-      {sidebarOpen && (
+      {/* {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 lg:hidden z-30"
           onClick={() => setSidebarOpen(false)}
         />
-      )}
+      )} */}
 
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {/* <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} /> */}
 
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
