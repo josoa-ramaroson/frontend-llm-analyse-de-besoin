@@ -6,8 +6,8 @@ const geist = Geist({ subsets: ['latin'] });
 const geistMono = Geist_Mono({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ChatGPT Clone',
-  description: 'A modern ChatGPT-style interface built with Next.js and TypeScript',
+  title: 'Need Analyst LLM',
+  description: '',
     generator: 'v0.app'
 };
 

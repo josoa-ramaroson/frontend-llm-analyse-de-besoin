@@ -1,5 +1,15 @@
 // lib/apiService.ts
+import { ERole, Message } from "@/store/useChatStore";
 import axios, { AxiosInstance, AxiosError, AxiosProgressEvent } from "axios";
+
+axios.defaults.timeout = 1200000;
+export type TRequestResponse = {
+  response: string,
+  model_id: string,
+  file_url: string,
+  uid: string,
+  role?: ERole
+}
 
 export interface SendMessageRequest {
   message: string;
@@ -86,7 +96,7 @@ class ApiService {
         model_id: request.model_id,
       };
 
-      const { data } = await this.axios.post<SendMessageResponse>("/chat", payload, {
+      const { data } = await this.axios.post<SendMessageResponse>("/v1/chat", payload, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -110,14 +120,14 @@ class ApiService {
     formData.append("model_id", modelId);
     formData.append("file", file);
 
-    const { data } = await this.axios.post<any>("/upload", formData, {
+    const { data } = await this.axios.post<any>("/chat/extract_requirements", formData, {
       headers: {},
       onUploadProgress, // <-- maintenant typé correctement
     });
 
     return {
       message: "Fichier envoyé avec succès",
-      fileName: file.name,
+      
       data,
     };
   } catch (err) {
@@ -129,9 +139,19 @@ class ApiService {
   /** Récupération des modèles */
   async getModels(): Promise<string[]> {
     try {
-      const { data } = await this.axios.get<{ available_models: string[] }>("/models");
-      console.log(data)
+      const { data } = await this.axios.get<{ available_models: string[] }>("/chat/models");
+      
       return data?.available_models ?? [];
+    } catch (err) {
+      this.handleAxiosError(err);
+    }
+  }
+
+  async getChatHistory(): Promise<TRequestResponse[]> {
+    try {
+      const { data } = await this.axios.get<TRequestResponse[]>("/chat/history");
+      console.log("message history data: ", data)
+      return data;
     } catch (err) {
       this.handleAxiosError(err);
     }

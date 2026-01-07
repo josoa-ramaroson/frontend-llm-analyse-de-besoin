@@ -24,13 +24,13 @@ export function Header({ onSidebarToggle }: HeaderProps) {
         <h1 className="text-lg font-semibold text-foreground">Need Analysis LLM</h1>
       </div>
 
-      <button
+      {/* <button
         onClick={clearConversation}
         className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-lg transition-colors text-sm font-medium"
       >
         <Plus className="w-4 h-4" />
         New Chat
-      </button>
+      </button> */}
     </header>
   );
 }

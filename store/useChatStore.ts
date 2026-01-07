@@ -1,67 +1,47 @@
+// store/useChatStore.ts
 import { create } from 'zustand';
 
+export enum ERole {
+ USER= "user",
+ ASSISTANT="assistant"
+}
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  // optional file metadata
+  role?: ERole;
+  file_url?: string;
+  model_id?: string;
+  uid?: string;
 }
 
 interface ChatStore {
   messages: Message[];
   isLoading: boolean;
-  addMessage: (message: Message) => void;
-  sendMessage: (text: string) => Promise<void>;
+  addMessage: (message: Partial<Message>) => void;
   clearConversation: () => void;
   setIsLoading: (loading: boolean) => void;
 }
 
-export const useChatStore = create<ChatStore>((set, get) => ({
+export const useChatStore = create<ChatStore>((set) => ({
   messages: [],
   isLoading: false,
 
-  addMessage: (message: Message) => {
-    set((state) => ({
-      messages: [...state.messages, message],
-    }));
-  },
-
-  sendMessage: async (text: string) => {
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
+  addMessage: (message: Partial<Message>) => {
+    const normalized: Message = {
+      id: message.id ?? Date.now().toString(),
+      role: message.role ?? ERole.ASSISTANT,
+      content: message.content ?? '',
+      timestamp: message.timestamp ? new Date(message.timestamp) : new Date(),
+      file_url: message.file_url,
+      model_id: message.model_id,
     };
-
     set((state) => ({
-      messages: [...state.messages, userMessage],
-      isLoading: true,
-    }));
-
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    // Add assistant response
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: `Réponse simulée pour: "${text}"`,
-      timestamp: new Date(),
-    };
-
-    set((state) => ({
-      messages: [...state.messages, assistantMessage],
-      isLoading: false,
+      messages: [...state.messages, normalized],
     }));
   },
 
-  clearConversation: () => {
-    set({ messages: [] });
-  },
-
-  setIsLoading: (loading: boolean) => {
-    set({ isLoading: loading });
-  },
+  clearConversation: () => set({ messages: [] }),
+  setIsLoading: (loading: boolean) => set({ isLoading: loading }),
 }));

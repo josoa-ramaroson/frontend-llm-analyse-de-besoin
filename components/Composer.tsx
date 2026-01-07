@@ -1,14 +1,17 @@
+// Composer.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Paperclip } from 'lucide-react';
-import { useChatStore } from '@/store/useChatStore';
+import { ERole, useChatStore } from '@/store/useChatStore';
 import apiService from '@/services/apiService'; // adapter le chemin si besoin
 import { AxiosProgressEvent } from 'axios';
 
+
 export function Composer() {
-  const sendMessage = useChatStore((s) => s.sendMessage);
-  const isLoading = useChatStore((s) => s.isLoading);
+  const addMessage = useChatStore((s) => s.addMessage);
+  // NOTE: on ne récupère plus sendMessage
+  // const isLoading = useChatStore((s) => s.isLoading); // supprimé (optionnel)
 
   // Upload state
   const [models, setModels] = useState<string[]>([]);
@@ -17,7 +20,6 @@ export function Composer() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<number>(0);
-  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -35,26 +37,26 @@ export function Composer() {
     })();
   }, []);
 
+  async function handleFileChosen(f: File | null) {
+    setFile(f);
+    setError(null);
+    setProgress(0);
+
+    if (!f) return;
+
+    const name = f.name.toLowerCase();
+  }
+
   function onFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
-    if (f) {
-      setFile(f);
-      setResult(null);
-      setError(null);
-      setProgress(0);
-    }
+    handleFileChosen(f);
   }
 
   function onDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragging(false);
     const f = e.dataTransfer.files?.[0] ?? null;
-    if (f) {
-      setFile(f);
-      setResult(null);
-      setError(null);
-      setProgress(0);
-    }
+    handleFileChosen(f);
   }
 
   function onDragOver(e: React.DragEvent<HTMLDivElement>) {
@@ -68,7 +70,6 @@ export function Composer() {
 
   async function handleUpload() {
     setError(null);
-    setResult(null);
 
     if (!file) {
       setError('Aucun fichier sélectionné.');
@@ -80,8 +81,13 @@ export function Composer() {
       return;
     }
 
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      setError('Le fichier doit être un PDF.');
+    const filename = file.name.toLowerCase();
+    if (
+      !filename.endsWith('.pdf') &&
+      !filename.endsWith('.docx') &&
+      !filename.endsWith('.txt')
+    ) {
+      setError('Le fichier doit être un PDF, DOCX ou TXT.');
       return;
     }
 
@@ -89,10 +95,6 @@ export function Composer() {
       setUploading(true);
       setProgress(0);
 
-      // NOTE:
-      // onUploadProgress : callback ProgressEvent => setProgress
-      // Si ta version d'ApiService prend ce 3ème argument, tout est bon.
-      // Sinon je peux ajouter ce paramètre dans ApiService (dis-moi).
       const resp = await apiService.uploadFile(
         selectedModel,
         file,
@@ -102,42 +104,51 @@ export function Composer() {
             setProgress(pct);
           }
         }
-
       );
 
-      // Affiche le résultat brut
-      setResult(resp?.data ?? resp);
+      const server = resp?.data ?? resp;
 
-      // Si la réponse contient un champ texte utile, réutiliser sendMessage pour conserver le flow
-      // (la logique existante du store traitera l'affichage)
-      const candidateReply =
-        resp?.data?.reply ??
-        (typeof resp?.data === 'string' ? resp.data : undefined);
+      const content =
+        typeof server?.response === 'string'
+          ? server.response
+          : server?.response
+          ? JSON.stringify(server.response, null, 2)
+          : JSON.stringify(server, null, 2);
 
-      if (candidateReply && typeof candidateReply === 'string') {
-        // On envoie la réponse dans le store pour être affichée comme message reçu
-        // (Adapte si ton store attend un autre format)
-        await sendMessage(candidateReply);
-      }
+      const savedFileUrl: String =
+        server?.file_url ?? server?.saved_filename ?? resp?.fileName ?? null;
+
+      const backendBase = (process.env.NEXT_PUBLIC_BACKEND_URL ?? '').replace(/\/$/, '');
+      const fileUrl = savedFileUrl.startsWith("http") ? `${savedFileUrl}` : `${backendBase}/${savedFileUrl}`;
+
+      const timestamp = server?.timestamp ? new Date(server?.timestamp): new Date()
+      // Ajoute la réponse assistant directement dans le store (plus de sendMessage)
+      addMessage({
+        role: ERole.ASSISTANT,
+        content,
+        file_url: fileUrl ?? undefined,
+        model_id: server?.model_id ?? selectedModel,
+        timestamp: timestamp,
+      });
+
+      
     } catch (err: any) {
       setError(err?.message || "Erreur lors de l'upload");
     } finally {
       setUploading(false);
       setFile(null);
-      setResult(null);
-      setError(null);
+      setProgress(0);
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h3 className="text-lg font-medium mb-3">Uploader un PDF / Extraction</h3>
-
-      <label className="block text-sm font-medium mb-2">Choisir un modèle</label>
+    <div className="max-w-2xl mx-auto p-2 overflow-auto flex flex-col gap-2">
+      {/* Choisir modèle */}
+      <label className="block text-sm font-medium">Choisir un modèle</label>
       <select
         value={selectedModel}
         onChange={(e) => setSelectedModel(e.target.value)}
-        className="mb-4 w-full border rounded px-3 py-2"
+        className="mb-0 w-full border rounded px-2 py-1 text-sm"
       >
         {models.length === 0 ? (
           <option value="">(Aucun modèle disponible)</option>
@@ -150,108 +161,71 @@ export function Composer() {
         )}
       </select>
 
+      {/* Drop area */}
       <div
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onClick={() => fileInputRef.current?.click()}
-        className={`mb-3 border-2 border-dashed rounded p-6 text-center cursor-pointer ${
+        className={`border-2 border-dashed rounded p-3 text-center cursor-pointer ${
           isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
         }`}
       >
         <input
           ref={fileInputRef}
           type="file"
-          accept="application/pdf"
+          accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
           onChange={onFileSelected}
           className="hidden"
         />
 
         {file ? (
           <div>
-            <p className="font-medium">Fichier sélectionné :</p>
-            <p className="text-sm">{file.name}</p>
+            <p className="font-medium text-sm">Fichier :</p>
+            <p className="text-xs truncate max-w-full">{file.name}</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
-            <Paperclip className="w-6 h-6 text-gray-500" />
-            <p className="font-medium">Déposez un fichier PDF ici, ou cliquez pour choisir</p>
-            <p className="text-sm text-gray-500">Seuls les PDF sont acceptés</p>
+          <div className="flex flex-col items-center gap-1">
+            <Paperclip className="w-5 h-5 text-gray-500" />
+            <p className="font-medium text-sm">Déposez un fichier PDF / DOCX / TXT</p>
+            <p className="text-xs text-gray-500">Seuls PDF, DOCX, TXT</p>
           </div>
         )}
       </div>
 
-      {/* Upload progress */}
+      {/* Upload progress / error */}
       {uploading && (
-        <div className="mb-3">
-          <div className="w-full bg-gray-200 h-3 rounded overflow-hidden">
-            <div
-              style={{ width: `${progress}%` }}
-              className="h-full rounded bg-gradient-to-r from-blue-500 to-blue-300"
-            />
+        <div className="mb-0">
+          <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
+            <div style={{ width: `${progress}%` }} className="h-full rounded bg-gradient-to-r from-blue-500 to-blue-300" />
           </div>
-          <p className="text-sm mt-1">Uploading: {progress}%</p>
+          <p className="text-xs mt-1">Uploading: {progress}%</p>
         </div>
       )}
 
-      {error && <div className="mb-3 text-red-600">{error}</div>}
+      {error && <div className="text-xs text-red-600">{error}</div>}
 
-      <div className="flex gap-2">
+      {/* Buttons */}
+      <div className="flex flex-col sm:flex-row gap-2 mt-1">
         <button
           onClick={handleUpload}
-          disabled={uploading || isLoading}
-          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60"
+          disabled={uploading}
+          className="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:opacity-60"
         >
-          {uploading ? 'Envoi...' : 'Envoyer le PDF'}
+          {uploading ? 'Envoi...' : 'Envoyer'}
         </button>
 
         <button
           onClick={() => {
             setFile(null);
-            setResult(null);
             setError(null);
             setProgress(0);
           }}
-          className="px-4 py-2 border rounded"
+          className="px-3 py-1 border rounded text-sm"
         >
           Réinitialiser
         </button>
       </div>
-
-      {/* {result && (
-        <div className="mt-4 p-3 border rounded bg-gray-50">
-          <h4 className="font-medium mb-2">Résultat</h4>
-          <pre className="text-xs max-h-72 overflow-auto">{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )} */}
-
-      {/* ----------------------------------------------------------------------
-          NOTE: j'ai commenté la zone de texte d'écriture (comme demandé).
-          Si tu veux la réactiver, décommente la partie suivante et replace-la
-          à l'endroit voulu dans l'UI.
-      ---------------------------------------------------------------------- */}
-      {/*
-      <div className="flex gap-3 mt-4">
-        <textarea
-          // textarea original commented out per request
-          placeholder="Type your message... (Shift+Enter for new line)"
-          disabled={isLoading}
-          className="flex-1 bg-secondary border border-border rounded-lg px-4 py-3 text-foreground placeholder-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-50"
-          style={{ minHeight: '48px' }}
-          rows={1}
-        />
-        <div className="flex gap-2">
-          <button
-            disabled={isLoading}
-            className="p-3 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors disabled:opacity-50"
-            aria-label="Upload file"
-          >
-            <Paperclip className="w-5 h-5 text-foreground" />
-          </button>
-        </div>
-      </div>
-      */}
-
     </div>
   );
 }
