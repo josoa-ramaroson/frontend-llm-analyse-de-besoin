@@ -51,51 +51,54 @@ export function ChatWindow() {
   }, [messages]);
 
   return (
-    <div className="flex flex-row h-full bg-background">
-      
-      {/* ================= LEFT: Messages ================= */}
-      <div className="flex-1 flex flex-col overflow-hidden border-r border-border">
-        
-        {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">AI</span>
-              </div>
-              <h2 className="text-2xl font-semibold text-foreground">
-                Assistant sur l'analyse de besoin
-              </h2>
-              <p className="text-foreground/60 max-w-md">
-                Extraire rapidement les exigences depuis un document parlant
-                d'un projet (dialogue, Cahier de Charge, document technique, etc...)
-              </p>
-            </div>
-          ) : (
-            <>
-              {messages.map((message, index) => (
-                <Message key={(message.id || index) + (message.file_url || Math.random().toString()) } message={message} />
-              ))}
-
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="flex gap-2 p-3 rounded-lg bg-secondary">
-                    <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce delay-100" />
-                    <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce delay-200" />
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          <div ref={messagesEndRef} />
+<div className="flex flex-col md:flex-row h-screen bg-background">
+  {/* ================= LEFT: Messages WRAPPER ================= */}
+  <div className="flex-1 flex flex-col min-h-0 md:border-r border-border">
+    {/* Messages Container (scrollable) */}
+    <div className="flex-1 overflow-y-auto min-h-0 p-3 md:p-6 space-y-4 md:space-y-6">
+      {messages.length === 0 ? (
+        <div className="h-full flex flex-col items-center justify-center text-center gap-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center">
+            <span className="text-2xl font-bold text-white">AI</span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-semibold text-foreground">
+            Assistant sur l'analyse de besoin
+          </h2>
+          <p className="text-sm md:text-base text-foreground/60 max-w-md">
+            Extraire rapidement les exigences depuis un document parlant
+            d'un projet (dialogue, Cahier de Charge, document technique, etc...)
+          </p>
         </div>
-      </div>
+      ) : (
+        <>
+          {messages.map((message, index) => (
+            <Message
+              key={(message.id || index) + (message.file_url || Math.random().toString())}
+              message={message}
+            />
+          ))}
 
-      {/* ================= RIGHT: Composer ================= */}
-      <div className="w-[360px] min-w-[320px] border-l border-border bg-background p-6">
-        <Composer />
-      </div>
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="flex gap-2 p-3 rounded-lg bg-secondary">
+                <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-foreground/50 rounded-full animate-bounce delay-200" />
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      <div ref={messagesEndRef} />
     </div>
+  </div>
+
+  {/* ================= RIGHT: Composer ================= */}
+  <div className="w-full md:w-[360px] md:min-w-[320px] bg-background p-3 md:p-6 border-t md:border-t-0 md:border-l border-border flex-shrink-0">
+    <Composer />
+  </div>
+</div>
+
+
   );
 }

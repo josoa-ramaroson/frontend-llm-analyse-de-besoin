@@ -13,7 +13,7 @@ type Requirement = {
   description: string;
   type: string;
 };
-type Cat = 'fonctionnelle' | 'non_fonctionnelle' | 'other';
+type Cat = 'fonctionnelle' | 'non_fonctionnelle' ;
 
 export default function Message({ message }: MessageProps) {
   const isUser = message.role === 'user';
@@ -74,23 +74,15 @@ export default function Message({ message }: MessageProps) {
 
   const classify = (t: any): Cat => {
     const s = String(t ?? '').toLowerCase();
-    if (
-      (s.includes('non') && s.includes('fonction')) ||
-      s.includes('non_fonction') ||
-      s.includes('non-fonction') ||
-      s.includes('nonfonction')
-    ) {
+      if (s === 'functional' || s === 'fonctionnel' || s === 'fonctionnelle') return 'fonctionnelle';
+      if (s === 'non_functional' || s === 'nonfonctionnel' || s === 'non_fonctionnelle') return 'non_fonctionnelle';
       return 'non_fonctionnelle';
-    }
-    if (s.includes('fonction') || s.includes('func')) return 'fonctionnelle';
-    if (s.includes('non')) return 'non_fonctionnelle';
-    return 'other';
   };
 
   const requirementsByType: Record<Cat, Requirement[]> = {
     fonctionnelle: [],
     non_fonctionnelle: [],
-    other: [],
+   
   };
 
   if (rawRequirements) {
@@ -113,127 +105,114 @@ export default function Message({ message }: MessageProps) {
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div
-        className={`max-w-2xl w-full px-4 py-3 rounded-lg ${bubbleClass} flex flex-col gap-4 group`}
-      >
-        {/* Header (assistant) */}
-        {!isUser && (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white">
-              AI
-            </div>
-            <div className="text-sm font-medium text-foreground/90">
-              {message.model_id ?? 'Assistant'}
-            </div>
-          </div>
-        )}
-
-        {/* Content: grouped by type */}
-        {rawRequirements ? (
-          <div className="grid gap-4">
-            {/* Fonctionnelles */}
-            {requirementsByType.fonctionnelle.length > 0 && (
-              <div>
-                <div className="text-sm font-semibold mb-2">Besoins fonctionnels</div>
-                <div className="space-y-2">
-                  {requirementsByType.fonctionnelle.map((r, i) => (
-                    <div
-                      key={`func-${i}`}
-                      className="p-3 rounded border border-gray-700 bg-transparent"
-                    >
-                      <div className="text-sm font-semibold text-foreground/95 mb-1">
-                        {r.exigence}
-                      </div>
-                      <div className="text-sm text-foreground/90">{r.description}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Non-fonctionnelles */}
-            {requirementsByType.non_fonctionnelle.length > 0 && (
-              <div>
-                <div className="text-sm font-semibold mb-2">Besoins non-fonctionnels</div>
-                <div className="space-y-2">
-                  {requirementsByType.non_fonctionnelle.map((r, i) => (
-                    <div
-                      key={`nonfunc-${i}`}
-                      className="p-3 rounded border border-gray-700 bg-transparent"
-                    >
-                      <div className="text-sm font-semibold text-foreground/95 mb-1">
-                        {r.exigence}
-                      </div>
-                      <div className="text-sm text-foreground/90">{r.description}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Other */}
-            {requirementsByType.other.length > 0 && (
-              <div>
-                <div className="text-sm font-semibold mb-2">Autres</div>
-                <div className="space-y-2">
-                  {requirementsByType.other.map((r, i) => (
-                    <div
-                      key={`other-${i}`}
-                      className="p-3 rounded border border-gray-700 bg-transparent"
-                    >
-                      <div className="text-sm font-semibold text-foreground/95 mb-1">
-                        {r.exigence || r.description}
-                      </div>
-                      {r.description && (
-                        <div className="text-sm text-foreground/90">{r.description}</div>
-                      )}
-                      <div className="text-xs opacity-70 mt-1">Type: {r.type}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Fallback raw content
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-        )}
-
-        {/* timestamp */}
-        <div className="mt-2">
-          <span className="text-xs opacity-70">
-            {message.timestamp instanceof Date
-              ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
+  <div
+    className={`w-full max-w-full sm:max-w-[85%] md:max-w-[70%] lg:max-w-[100%] px-3 py-2 md:px-4 md:py-3 rounded-lg ${bubbleClass} flex flex-col gap-3 group`}
+  >
+    {/* Header (assistant) */}
+    {!isUser && (
+      <div className="flex items-center gap-3">
+        <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full bg-gray-700 text-[10px] md:text-xs font-bold text-white">
+          AI
         </div>
+        <div className="text-xs md:text-sm font-medium text-foreground/90">
+          {message.model_id ?? 'Assistant'}
+        </div>
+      </div>
+    )}
 
-        {/* Bottom file preview (s'affiche en bas). download visible au survol du bloc (group-hover) */}
-        {url && (
-          <div className="mt-3 border-t border-gray-700 pt-3">
-            <div className="relative">
-              
-                <div className="flex items-center justify-between">
-                  <a href={url} target="_blank" rel="noopener noreferrer" className="underline">
-                    Ouvrir le fichier
-                  </a>
-
-                  <a
-                    href={url}
-                    // download={message.file_url?.split("/")[-1] ?? undefined}
-                    className="ml-2 inline-block opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label={`Télécharger le fichier`}
-                  >
-                    <div className="p-1 rounded bg-foreground/10 hover:bg-foreground/20">
-                      <Download className="w-4 h-4" />
-                    </div>
-                  </a>
+    {/* Content: grouped by type */}
+    {rawRequirements ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+        {/* Fonctionnelles */}
+        {requirementsByType.fonctionnelle.length > 0 && (
+          <div>
+            <div className="text-sm md:text-base font-semibold mb-2">Besoins fonctionnels</div>
+            <div className="space-y-2">
+              {requirementsByType.fonctionnelle.map((r, i) => (
+                <div
+                  key={`func-${i}`}
+                  className="p-2 md:p-3 rounded border border-cyan-400 bg-cyan-900/20 mb-2"
+                >
+                  <div className="text-sm md:text-sm font-semibold text-cyan-400 mb-1">
+                    {r.exigence}
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-300 leading-snug">
+                    {r.description}
+                  </div>
                 </div>
-              
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Non-fonctionnelles */}
+        {requirementsByType.non_fonctionnelle.length > 0 && (
+          <div>
+            <div className="text-sm md:text-base font-semibold mb-2">Besoins non-fonctionnels</div>
+            <div className="space-y-2">
+              {requirementsByType.non_fonctionnelle.map((r, i) => (
+                <div
+                  key={`nonfunc-${i}`}
+                  className="p-2 md:p-3 rounded border border-purple-400 bg-purple-900/20 mb-2"
+                >
+                  <div className="text-sm md:text-sm font-semibold text-purple-400 mb-1">
+                    {r.exigence}
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-300 leading-snug">
+                    {r.description}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
       </div>
+    ) : (
+      // Fallback raw content
+      <p className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+    )}
+
+    {/* timestamp */}
+    <div className="mt-2">
+      <span className="text-[11px] md:text-xs opacity-70">
+        {message.timestamp instanceof Date
+          ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </span>
     </div>
+
+    {/* Bottom file preview (s'affiche en bas). download visible sur mobile et au hover sur desktop */}
+    {url && (
+      <div className="mt-3 border-t border-gray-700 pt-3">
+        <div className="relative">
+          <div className="flex items-center justify-between">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-xs md:text-sm"
+              title="Ouvrir le fichier"
+            >
+              Ouvrir le fichier
+            </a>
+
+            <a
+              href={url}
+              download={message.file_url ? message.file_url.split('/').pop() : undefined}
+              className="ml-2 inline-block opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+              aria-label="Télécharger le fichier"
+              title="Télécharger le fichier"
+            >
+              <div className="p-1 rounded bg-foreground/10 hover:bg-foreground/20">
+                <Download className="w-4 h-4" />
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
   );
 }

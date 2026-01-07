@@ -24,20 +24,20 @@ export default function Home() {
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Header */}
-        <div className="w-full lg:hidden">
+        {/* <div className="w-full lg:hidden">
           <Header onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
-        </div>
+        </div> */}
 
         {/* Hidden header on desktop (part of layout) */}
-        <div className="hidden lg:flex w-full flex-col">
-          <Header onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
+        <div className="flex w-full flex-col">
+          {/* <Header onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} /> */}
           <ChatWindow />
         </div>
 
         {/* Chat window for mobile */}
-        <div className="lg:hidden flex-1 flex flex-col">
+        {/* <div className="lg:hidden flex-1 flex flex-col">
           <ChatWindow />
-        </div>
+        </div> */}
       </div>
     </div>
   );
