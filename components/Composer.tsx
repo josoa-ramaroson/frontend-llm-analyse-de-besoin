@@ -21,6 +21,7 @@ export function Composer() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -32,7 +33,7 @@ export function Composer() {
         setModels(list);
         if (list.length > 0) setSelectedModel(list[0]);
       } catch (err: any) {
-        setError(err?.message || 'Impossible de récupérer la liste des modèles');
+        setError(err?.message || 'Impossible to load model');
       }
     })();
   }, []);
@@ -72,12 +73,12 @@ export function Composer() {
     setError(null);
 
     if (!file) {
-      setError('Aucun fichier sélectionné.');
+      setError('File field empty.');
       return;
     }
 
     if (!selectedModel) {
-      setError('Aucun modèle sélectionné.');
+      setError('Model field empty.');
       return;
     }
 
@@ -87,7 +88,7 @@ export function Composer() {
       !filename.endsWith('.docx') &&
       !filename.endsWith('.txt')
     ) {
-      setError('Le fichier doit être un PDF, DOCX ou TXT.');
+      setError('Only PDF, DOCX ou TXT supported.');
       return;
     }
 
@@ -133,10 +134,10 @@ export function Composer() {
 
       
     } catch (err: any) {
-      setError(err?.message || "Erreur lors de l'upload");
+      setError(err?.message || "Error during upload");
     } finally {
       setUploading(false);
-      setFile(null);
+     // setFile(null);
       setProgress(0);
     }
   }
@@ -144,14 +145,14 @@ export function Composer() {
   return (
     <div className="max-w-2xl mx-auto p-2 overflow-auto flex flex-col gap-2">
       {/* Choisir modèle */}
-      <label className="block text-sm font-medium">Choisir un modèle</label>
+      <label className="block text-sm font-medium">Choose a model</label>
       <select
         value={selectedModel}
         onChange={(e) => setSelectedModel(e.target.value)}
         className="mb-0 w-full border rounded px-2 py-1 text-sm"
       >
         {models.length === 0 ? (
-          <option value="">(Aucun modèle disponible)</option>
+          <option value="">(No model found)</option>
         ) : (
           models.map((m) => (
             <option key={m} value={m}>
@@ -181,14 +182,14 @@ export function Composer() {
 
         {file ? (
           <div>
-            <p className="font-medium text-sm">Fichier :</p>
+            <p className="font-medium text-sm">File :</p>
             <p className="text-xs truncate max-w-full">{file.name}</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1">
             <Paperclip className="w-5 h-5 text-gray-500" />
-            <p className="font-medium text-sm">Déposez un fichier PDF / DOCX / TXT</p>
-            <p className="text-xs text-gray-500">Seuls PDF, DOCX, TXT</p>
+            <p className="font-medium text-sm">Upload PDF / DOCX / TXT</p>
+            <p className="text-xs text-gray-500">Only PDF, DOCX, TXT support</p>
           </div>
         )}
       </div>
@@ -205,6 +206,19 @@ export function Composer() {
 
       {error && <div className="text-xs text-red-600">{error}</div>}
 
+
+      {uploading && (
+        <div className="flex flex-col items-center gap-2 mt-2">
+          <div className="flex gap-1">
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+          </div>
+          <p className="text-xs text-gray-600">
+            Analyzing document in progress... This might take a while.
+          </p>
+        </div>
+      )}
       {/* Buttons */}
       <div className="flex flex-col sm:flex-row gap-2 mt-1">
         <button
@@ -212,7 +226,7 @@ export function Composer() {
           disabled={uploading}
           className="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:opacity-60"
         >
-          {uploading ? 'Envoi...' : 'Envoyer'}
+          {uploading ? 'Sending...' : 'Send'}
         </button>
 
         <button
@@ -223,9 +237,11 @@ export function Composer() {
           }}
           className="px-3 py-1 border rounded text-sm"
         >
-          Réinitialiser
+          Start over
         </button>
+        
       </div>
+
     </div>
   );
 }

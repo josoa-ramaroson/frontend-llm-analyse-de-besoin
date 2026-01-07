@@ -2,7 +2,6 @@
 import { ERole, Message } from "@/store/useChatStore";
 import axios, { AxiosInstance, AxiosError, AxiosProgressEvent } from "axios";
 
-axios.defaults.timeout = 1200000;
 export type TRequestResponse = {
   response: string,
   model_id: string,
@@ -50,7 +49,7 @@ class ApiService {
 
     this.axios = axios.create({
       baseURL,
-      timeout: 30_000, // 30s timeout
+      timeout: 900_000, // 900s timeout
       headers: {
         "Accept": "application/json",
       },
