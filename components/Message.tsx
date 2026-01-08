@@ -106,7 +106,7 @@ export default function Message({ message }: MessageProps) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
   <div
-    className={`w-full max-w-full sm:max-w-[85%] md:max-w-[70%] lg:max-w-[100%] px-3 py-2 md:px-4 md:py-3 rounded-lg ${bubbleClass} flex flex-col gap-3 group`}
+    className={`w-full max-w-full sm:max-w-[90%] md:max-w-[100%] lg:max-w-[100%] px-3 py-2 md:px-4 md:py-3 rounded-lg ${bubbleClass} flex flex-col gap-3 group`}
   >
     {/* Header (assistant) */}
     {!isUser && (
@@ -122,7 +122,7 @@ export default function Message({ message }: MessageProps) {
 
     {/* Content: grouped by type */}
     {rawRequirements ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+      <div className="grid grid-cols-1  sm:grid-cols-2 gap-3 md:gap-4">
         {/* Fonctionnelles */}
         {requirementsByType.fonctionnelle.length > 0 && (
           <div>
