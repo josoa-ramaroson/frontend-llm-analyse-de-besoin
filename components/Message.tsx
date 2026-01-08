@@ -126,7 +126,7 @@ export default function Message({ message }: MessageProps) {
         {/* Fonctionnelles */}
         {requirementsByType.fonctionnelle.length > 0 && (
           <div>
-            <div className="text-sm md:text-base font-semibold mb-2">Besoins fonctionnels</div>
+            <div className="text-sm md:text-base font-semibold mb-2">Functional requirement</div>
             <div className="space-y-2">
               {requirementsByType.fonctionnelle.map((r, i) => (
                 <div
@@ -148,7 +148,7 @@ export default function Message({ message }: MessageProps) {
         {/* Non-fonctionnelles */}
         {requirementsByType.non_fonctionnelle.length > 0 && (
           <div>
-            <div className="text-sm md:text-base font-semibold mb-2">Besoins non-fonctionnels</div>
+            <div className="text-sm md:text-base font-semibold mb-2">Non-functional requirement</div>
             <div className="space-y-2">
               {requirementsByType.non_fonctionnelle.map((r, i) => (
                 <div
@@ -191,9 +191,9 @@ export default function Message({ message }: MessageProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="underline text-xs md:text-sm"
-              title="Ouvrir le fichier"
+              title="Open the file"
             >
-              Ouvrir le fichier
+              Open the file
             </a>
 
             <a
