@@ -53,9 +53,9 @@ export function ChatWindow() {
   return (
 <div className="flex flex-col md:flex-row h-screen bg-background">
   {/* ================= LEFT: Messages WRAPPER ================= */}
-  <div className="flex-1 flex flex-col min-h-0 md:border-r border-border">
+  <div className="flex-1 flex flex-col min-h-0  md:border-r border-border ">
     {/* Messages Container (scrollable) */}
-    <div className="flex-1 overflow-y-auto min-h-0 p-3 md:p-6 space-y-4 md:space-y-6">
+    <div className="flex-1 mt-5 md:mt-1  overflow-y-auto min-h-0 p-3 md:p-6 space-y-4 md:space-y-6">
       {messages.length === 0 ? (
         <div className="h-full flex flex-col items-center justify-center text-center gap-4">
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/50 rounded-full flex items-center justify-center">
